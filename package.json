@@ -747,8 +747,8 @@
         "webpack-cli": "^4.10.0"
     },
     "dependencies": {
-        "@renovatebot/pep440": "^2.0.0",
-        "@vscode/extension-telemetry": "^0.9.6",
+        "@renovatebot/pep440": "^2.1.20",
+        "@vscode/extension-telemetry": "^0.9.7",
         "execa": "^8.0.1",
         "get-port": "<6.0.0",
         "node-fetch": "^3.3.2",
