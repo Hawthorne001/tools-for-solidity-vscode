@@ -1,5 +1,74 @@
 # Change Log
 
+## [1.16.7]
+### Features
+- Added support for multiple chain sessions
+- Added automatic chain state saving when extension is deactivated, and restoring it on activation
+- Refactored the extension's architecture
+- Added new error messages to the UI
+
+### Fixes
+- Improved error handling on unexpected LSP server crashes
+- Minor fixes
+
+## [1.16.6]
+### Features
+- The extension is now being published also to the Open VSX Registry
+
+### Fixes
+- Minor UI fixes
+- Fixed the extension not being available on Open VSX
+
+## [1.16.5]
+### Features
+- Improved the UI of the Deploy and Interact tab
+
+## [1.16.4]
+### Fixes
+- Fixed language server with conda installation crashing due to colliding Python packages being installed in user site-packages
+
+## [1.16.3]
+### Fixes
+- Fixed various compilation issues
+- Increased timeouts to download solc binaries
+- Anvil is now also being detected in standard `~/.foundry/bin` directory
+
+## [1.16.2]
+### Fixes
+- Python environment variables are now being unset before activating conda environment
+
+## [1.16.1]
+### Improvements
+- Added auto-importing of Foundry remappings
+- Added support for decoding structs in transaction output
+- Added option for upcoming Prague EVM version in settings
+- Improved error messaging when Wake installation via conda fails
+- Refined descriptions for various settings
+
+### Fixes
+- Resolved anonymous authentication issues when downloading Wake (conda installation)
+
+## [1.16.0]
+### Major changes
+- The extension is being rebranded as Solidity for VS Code
+- Introducing Deploy and Interact UI - test and interact with your smart contracts on a local node
+
+### Improvements
+- Language server now watches for external changes to Solidity files and recompiles automatically
+- Improved LSP responsiveness and RAM usage
+
+### Fixes
+- Fixed multiple memory leaks in LSP
+- Fixed sending compilation build to detectors/printers subprocess causing crashes due to build size & cyclic references
+- Fixed multiple minor LSP issues
+
+## [1.14.0]
+- Added workspace symbols feature
+- Detectors & printers now run in subprocesses, making the language server more responsive
+- Re-implemented code lens af LSP printers, making them more configurable (incl. on/off switch via `only` and `exclude` config options)
+- Dropped support for Python 3.7
+- Bugfixes & stability improvements
+
 ## [1.13.1]
 - Fixed possible `eth-wake` installation issues
 

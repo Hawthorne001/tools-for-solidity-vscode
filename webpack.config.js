@@ -2,8 +2,13 @@
 
 'use strict';
 
+// import WatchExternalFilesPlugin from 'webpack-watch-files-plugin';
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+// const WatchExternalFilesPlugin = require('webpack-watch-files-plugin');
+const WatchExternalFilesPlugin = require('webpack-watch-external-files-plugin');
+
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -19,7 +24,9 @@ const config = {
   },
   devtool: 'source-map',
   externals: {
-    vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    '@azure/functions-core': 'commonjs @azure/functions-core',
+    'applicationinsights-native-metrics': 'commonjs applicationinsights-native-metrics',
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -39,7 +46,12 @@ const config = {
     rules: [
       {
         test: /\.ts$/,
-        exclude: /node_modules/,
+        exclude: [
+            /node_modules/
+        ],
+        include: [
+            /src/
+        ],
         use: [
           {
             loader: 'ts-loader'
@@ -47,6 +59,36 @@ const config = {
         ]
       }
     ]
-  }
+  },
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: 'src/sake/webview/dist/sake/webview.js',
+          to: 'sake/webview/sake/webview.js'
+        },
+        {
+          from: 'src/sake/webview/dist/sake/bundle.css',
+          to: 'sake/webview/sake/bundle.css'
+        },
+        {
+            from: 'src/sake/media/reset.css',
+            to: 'sake/media/reset.css'
+        },
+        {
+            from: 'src/sake/media/vscode.css',
+            to: 'sake/media/vscode.css'
+        }
+      ],
+    }),
+    // @ts-ignore
+    new WatchExternalFilesPlugin({
+      files: [
+        'src/sake/webview/dist/**/*'
+      ]
+    }),
+  ],
+  // The 'exclude' property is not valid in this context, so it should be removed.
 };
+
 module.exports = config;
