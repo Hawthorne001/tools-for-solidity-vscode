@@ -1148,7 +1148,7 @@
         "prettier-plugin-solidity": "^1.4.2",
         "sirv": "^2.0.4",
         "tar": "^7.4.0",
-        "tmp": "^0.2.3",
+        "tmp": "^0.2.4",
         "uuid": "^10.0.0",
         "vscode-languageclient": "^8.0.1",
         "wait-port": "^0.3.0",
