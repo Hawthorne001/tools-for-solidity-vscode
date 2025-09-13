@@ -1146,7 +1146,7 @@
         "pidtree": "^0.6.0",
         "polka": "^0.5.2",
         "prettier-plugin-solidity": "^1.4.2",
-        "sirv": "^2.0.4",
+        "sirv": "^3.0.2",
         "tar": "^7.4.0",
         "tmp": "^0.2.3",
         "uuid": "^10.0.0",
