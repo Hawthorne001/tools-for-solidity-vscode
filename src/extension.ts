@@ -711,12 +711,6 @@ function registerFormatter(context: vscode.ExtensionContext) {
     );
 }
 
-function registerFormatter(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
-        vscode.languages.registerDocumentFormattingEditProvider('solidity', new PrettierFormatter())
-    );
-}
-
 function watchFoundryRemappings() {
     const workspaces = vscode.workspace.workspaceFolders;
     if (workspaces === undefined || workspaces.length > 1) {
