@@ -12,6 +12,7 @@
         ],
         "sourceMap": true,
         "rootDir": "src",
+        "resolveJsonModule": true,
 
         // FOR SOME REASON WEBPACK IGNORES THIS?
         // "paths": {

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as env from './env';
 import appState from './sake/state/shared/AppState';
 import { extensionState } from './sake/state/shared/ExtensionState';
+import { VersionStatus } from './installers/installerInterface';
 
 let appInsights = require('applicationinsights');
 
@@ -25,6 +26,9 @@ export class Analytics {
     context: vscode.ExtensionContext | undefined;
     telemetryLogger: vscode.TelemetryLogger | undefined;
     wakeVersion: string | undefined;
+    wakeVersionStatus: VersionStatus | undefined;
+    anvilVersion: string | undefined;
+    anvilVersionStatus: VersionStatus | undefined;
     correctPythonPath: boolean | undefined;
     correctSysPath: boolean | undefined;
     installation: string | undefined;
@@ -47,6 +51,9 @@ export class Analytics {
         this.context = context;
         this.telemetryLogger = vscode.env.createTelemetryLogger(new TelemetrySender());
         this.wakeVersion = undefined;
+        this.wakeVersionStatus = undefined;
+        this.anvilVersion = undefined;
+        this.anvilVersionStatus = undefined;
         this.correctPythonPath = undefined;
         this.correctSysPath = undefined;
 
@@ -57,6 +64,18 @@ export class Analytics {
 
     public setWakeVersion(version: string) {
         this.wakeVersion = version;
+    }
+
+    public setWakeVersionStatus(status: VersionStatus) {
+        this.wakeVersionStatus = status;
+    }
+
+    public setAnvilVersion(version: string) {
+        this.anvilVersion = version;
+    }
+
+    public setAnvilVersionStatus(status: VersionStatus) {
+        this.anvilVersionStatus = status;
     }
 
     public setCorrectPythonPath(correct: boolean) {
@@ -90,7 +109,10 @@ export class Analytics {
             'common.os': process.platform.toString(),
             'common.nodeArch': process.arch,
             installation: this.installation,
-            'wake.version': this.wakeVersion || 'unknown'
+            'wake.version': this.wakeVersion || 'unknown',
+            'wake.versionStatus': this.wakeVersionStatus || 'unknown',
+            'anvil.version': this.anvilVersion || 'unknown',
+            'anvil.versionStatus': this.anvilVersionStatus || 'unknown'
         });
     }
 
@@ -110,6 +132,9 @@ export class Analytics {
             'common.nodeArch': process.arch,
             installation: this.installation,
             'wake.version': this.wakeVersion || 'unknown',
+            'wake.versionStatus': this.wakeVersionStatus || 'unknown',
+            'anvil.version': this.anvilVersion || 'unknown',
+            'anvil.versionStatus': this.anvilVersionStatus || 'unknown',
             error: error.toString().slice(-8100),
             correctPythonPath: this.correctPythonPath,
             correctSysPath: this.correctSysPath

@@ -1,0 +1,26 @@
+{
+    "dependencies": {
+        "wake": {
+            "name": "eth-wake",
+            "description": "Static analysis framework for Solidity smart contracts",
+            "versions": {
+                "minimum": "4.0.0",
+                "recommended": "4.20.1",
+                "maximum": "5.0.0"
+            },
+            "links": {
+                "releases": "https://github.com/Ackee-Blockchain/wake/releases",
+                "documentation": "https://ackee.xyz/wake/docs/latest/",
+                "pypi": "https://pypi.org/project/eth-wake/"
+            }
+        },
+        "anvil": {
+            "name": "anvil",
+            "description": "Local Ethereum node from Foundry toolkit",
+            "versions": {
+                "minimum": "1.4.0",
+                "recommended": "1.4.0"
+            }
+        }
+    }
+}

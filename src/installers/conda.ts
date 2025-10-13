@@ -9,13 +9,24 @@ import { Compute, GoogleAuth } from 'google-auth-library';
 import { ExecaChildProcess, execaSync, execa } from 'execa';
 import { compare, explain } from '@renovatebot/pep440';
 import { Analytics, EventType } from '../Analytics';
-import { Installer, WAKE_MIN_VERSION } from './installerInterface';
+import {
+    Installer,
+    WAKE_MIN_VERSION,
+    WAKE_RECOMMENDED_VERSION,
+    WAKE_MAX_VERSION,
+    ANVIL_MIN_VERSION,
+    ANVIL_RECOMMENDED_VERSION,
+    ANVIL_MAX_VERSION,
+    checkVersionStatus
+} from './installerInterface';
 import { JSONClient } from 'google-auth-library/build/src/auth/googleauth';
-
+import * as semver from 'semver';
 
 class AnonymousAuthClient extends GoogleAuth {
     async getClient(): Promise<Compute | JSONClient | JSONClient> {
-        throw new Error('Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.');
+        throw new Error(
+            'Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.'
+        );
     }
 }
 
@@ -290,10 +301,54 @@ export class CondaInstaller implements Installer {
             fs.writeFileSync(this.markerFile, latestVersion);
 
             this.analytics.setWakeVersion(latestVersion);
+            const wakeStatus = checkVersionStatus(
+                latestVersion,
+                WAKE_MIN_VERSION,
+                WAKE_RECOMMENDED_VERSION,
+                WAKE_MAX_VERSION
+            );
+            this.analytics.setWakeVersionStatus(wakeStatus);
+
+            try {
+                const anvilVersion = this.getAnvilVersion();
+                this.analytics.setAnvilVersion(anvilVersion);
+                const anvilStatus = checkVersionStatus(
+                    anvilVersion,
+                    ANVIL_MIN_VERSION,
+                    ANVIL_RECOMMENDED_VERSION,
+                    ANVIL_MAX_VERSION
+                );
+                this.analytics.setAnvilVersionStatus(anvilStatus);
+            } catch (err) {
+                // Anvil not installed or not available
+                console.log('Anvil not found', err);
+            }
 
             return;
         } else {
             this.analytics.setWakeVersion(currentVersion);
+            const wakeStatus = checkVersionStatus(
+                currentVersion,
+                WAKE_MIN_VERSION,
+                WAKE_RECOMMENDED_VERSION,
+                WAKE_MAX_VERSION
+            );
+            this.analytics.setWakeVersionStatus(wakeStatus);
+
+            try {
+                const anvilVersion = this.getAnvilVersion();
+                this.analytics.setAnvilVersion(anvilVersion);
+                const anvilStatus = checkVersionStatus(
+                    anvilVersion,
+                    ANVIL_MIN_VERSION,
+                    ANVIL_RECOMMENDED_VERSION,
+                    ANVIL_MAX_VERSION
+                );
+                this.analytics.setAnvilVersionStatus(anvilStatus);
+            } catch (err) {
+                // Anvil not installed or not available
+                console.log('Anvil not found', err);
+            }
 
             promise.then(([latestFile, latestVersion]) => {
                 if (latestFile === undefined || latestVersion === undefined) {
@@ -329,6 +384,15 @@ export class CondaInstaller implements Installer {
         }
     }
 
+    private getAnvilVersion(): string {
+        const output = execaSync('anvil', ['--version']).stdout.trim();
+        const match = output.match(/anvil Version: ([\d\.]+-?[\w]*)/);
+        if (match && match[1]) {
+            return semver.clean(match[1]) || match[1];
+        }
+        return output;
+    }
+
     private getCertifiPath(): string | undefined {
         try {
             return execaSync(
@@ -345,29 +409,59 @@ export class CondaInstaller implements Installer {
         const env = { ...process.env, PYTHONIOENCODING: 'utf8' } as { [key: string]: string };
 
         try {
-            let pythonPath = execaSync(`${this.activateCommand} && python -c "import sys; print(sys.executable)"`, { shell: this.shell }).stdout;
+            let pythonPath = execaSync(
+                `${this.activateCommand} && python -c "import sys; print(sys.executable)"`,
+                { shell: this.shell }
+            ).stdout;
 
             let correctPythonPath = undefined;
             let correctSysPath = undefined;
 
             if (process.platform === 'win32') {
-                let expectedPythonPath = path.join(this.context.globalStorageUri.fsPath, 'wake-conda', 'python.exe');
-                correctPythonPath = (path.normalize(pythonPath) === path.normalize(expectedPythonPath));
+                let expectedPythonPath = path.join(
+                    this.context.globalStorageUri.fsPath,
+                    'wake-conda',
+                    'python.exe'
+                );
+                correctPythonPath =
+                    path.normalize(pythonPath) === path.normalize(expectedPythonPath);
             } else {
-                let expectedPythonPath = path.join(this.context.globalStorageUri.fsPath, 'wake-conda', 'bin', 'python');
-                let expectedPython3Path = path.join(this.context.globalStorageUri.fsPath, 'wake-conda', 'bin', 'python3');
-                correctPythonPath = (path.normalize(pythonPath) === path.normalize(expectedPythonPath)) || (path.normalize(pythonPath) === path.normalize(expectedPython3Path));
+                let expectedPythonPath = path.join(
+                    this.context.globalStorageUri.fsPath,
+                    'wake-conda',
+                    'bin',
+                    'python'
+                );
+                let expectedPython3Path = path.join(
+                    this.context.globalStorageUri.fsPath,
+                    'wake-conda',
+                    'bin',
+                    'python3'
+                );
+                correctPythonPath =
+                    path.normalize(pythonPath) === path.normalize(expectedPythonPath) ||
+                    path.normalize(pythonPath) === path.normalize(expectedPython3Path);
             }
 
             this.analytics.setCorrectPythonPath(correctPythonPath);
 
             // Check sys.path
-            let sysPathOutput = execaSync(`${this.activateCommand} && python -c "import sys; print(';'.join(sys.path))"`, { shell: this.shell }).stdout;
+            let sysPathOutput = execaSync(
+                `${this.activateCommand} && python -c "import sys; print(';'.join(sys.path))"`,
+                { shell: this.shell }
+            ).stdout;
             let sysPathList = sysPathOutput.split(';');
 
-            correctSysPath = sysPathList.every(p =>
-                p === '' ||
-                path.normalize(p).startsWith(path.normalize(path.join(this.context.globalStorageUri.fsPath, 'wake-conda')))
+            correctSysPath = sysPathList.every(
+                (p) =>
+                    p === '' ||
+                    path
+                        .normalize(p)
+                        .startsWith(
+                            path.normalize(
+                                path.join(this.context.globalStorageUri.fsPath, 'wake-conda')
+                            )
+                        )
             );
 
             this.analytics.setCorrectSysPath(correctSysPath);
