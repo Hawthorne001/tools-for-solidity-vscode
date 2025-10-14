@@ -209,11 +209,13 @@
                             </ClickableSpan>
                         {/if}
 
-                        <ClickableSpan callback={toggleAutosave}>
-                            <BlankIcon />
-                            {$currentChain.persistence.isAutosaveEnabled ? 'Disable' : 'Enable'}
-                            state autosaving
-                        </ClickableSpan>
+                        {#if $currentChain.persistence.lastSaveTimestamp !== undefined}
+                            <ClickableSpan callback={toggleAutosave}>
+                                <BlankIcon />
+                                {$currentChain.persistence.isAutosaveEnabled ? 'Disable' : 'Enable'}
+                                state autosaving
+                            </ClickableSpan>
+                        {/if}
                     </div>
                 {/if}
 
