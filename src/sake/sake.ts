@@ -20,6 +20,10 @@ export async function initializeChains() {
         return;
     }
 
+    if (!appState.get().isWakeServerRunning) {
+        return;
+    }
+
     /* Load Chains */
     appState.setLazy({
         initializationState: 'loadingChains'
@@ -56,6 +60,10 @@ export async function activateSake(context: vscode.ExtensionContext, client: Lan
         const wasRunning = appState.get().isWakeServerRunning;
         const isRunning = state.newState === State.Running;
         appState.setLazy({ isWakeServerRunning: isRunning });
+
+        if (isRunning && !chainsInitialized) {
+            initializeChains();
+        }
 
         // Don't automatically initialize chains here - wait for the sidebar to open
         // The initialization will happen in BaseWebviewProvider.resolveWebviewView()
@@ -135,14 +143,22 @@ export async function activateSake(context: vscode.ExtensionContext, client: Lan
 export function deactivateSake() {}
 
 async function loadChains() {
+    console.log('Loading chains');
     await loadFullState();
 
     // Skip if any providers were loaded from state
     if (chainRegistry.getAll().length > 0) {
+        console.log(chainRegistry.getAll().length, 'Chains loaded');
         return;
     }
 
+    console.log('Creating new local chain');
+
     // Start with a default local chain
+    await createDefaultLocalChain();
+}
+
+async function createDefaultLocalChain() {
     await SakeProviderFactory.createNewLocalProvider('Local Chain 1', undefined, undefined, true);
 }
 
