@@ -66,11 +66,6 @@ export abstract class BaseWebviewProvider implements vscode.WebviewViewProvider 
         this._view = webviewView;
         this._webview = webviewView.webview;
 
-        // Initialize chains when the sidebar is first opened
-        initializeChains().catch((e) => {
-            console.error('Failed to initialize chains:', e);
-        });
-
         // Set the webview's initial options
         webviewView.webview.options = {
             enableScripts: true, // Allow scripts in the webview
@@ -84,6 +79,13 @@ export abstract class BaseWebviewProvider implements vscode.WebviewViewProvider 
 
         // Set the webview's initial html content
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        console.log('Resolving webview view');
+
+        // Initialize chains when the sidebar is first opened
+        initializeChains().catch((e) => {
+            console.error('Failed to initialize chains:', e);
+        });
     }
 
     public revive(panel: vscode.WebviewView) {

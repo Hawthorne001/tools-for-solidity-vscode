@@ -2,7 +2,16 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ExecaChildProcess, execaSync, execa } from 'execa';
 import { compare } from '@renovatebot/pep440';
-import { Installer, WAKE_MIN_VERSION } from './installerInterface';
+import {
+    Installer,
+    WAKE_MIN_VERSION,
+    WAKE_RECOMMENDED_VERSION,
+    WAKE_MAX_VERSION,
+    ANVIL_MIN_VERSION,
+    ANVIL_RECOMMENDED_VERSION,
+    ANVIL_MAX_VERSION,
+    checkVersionStatus
+} from './installerInterface';
 import { Analytics, EventType } from '../Analytics';
 
 export class ManualInstaller implements Installer {
@@ -100,6 +109,15 @@ export class ManualInstaller implements Installer {
         }
     }
 
+    protected getAnvilVersion(): string {
+        const output = execaSync('anvil', ['--version']).stdout.trim();
+        const match = output.match(/anvil Version: ([\d\.]+-?[\w]*)/);
+        if (match && match[1]) {
+            return match[1];
+        }
+        return output;
+    }
+
     async setup(): Promise<void> {}
 
     startWake(port: number): ExecaChildProcess {
@@ -125,6 +143,28 @@ export class ManualInstaller implements Installer {
         }
 
         this.analytics.setWakeVersion(version);
+        const wakeStatus = checkVersionStatus(
+            version,
+            WAKE_MIN_VERSION,
+            WAKE_RECOMMENDED_VERSION,
+            WAKE_MAX_VERSION
+        );
+        this.analytics.setWakeVersionStatus(wakeStatus);
+
+        try {
+            const anvilVersion = this.getAnvilVersion();
+            this.analytics.setAnvilVersion(anvilVersion);
+            const anvilStatus = checkVersionStatus(
+                anvilVersion,
+                ANVIL_MIN_VERSION,
+                ANVIL_RECOMMENDED_VERSION,
+                ANVIL_MAX_VERSION
+            );
+            this.analytics.setAnvilVersionStatus(anvilStatus);
+        } catch (err) {
+            // Anvil not installed or not available
+            console.log('Anvil not found', err);
+        }
 
         const env = { ...process.env, PYTHONIOENCODING: 'utf8' } as { [key: string]: string };
 
