@@ -19,7 +19,8 @@
             "description": "Local Ethereum node from Foundry toolkit",
             "versions": {
                 "minimum": "1.4.0",
-                "recommended": "1.4.0"
+                "recommended": "1.4.0",
+                "maximum": null
             }
         }
     }
