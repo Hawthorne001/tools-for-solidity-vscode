@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.3]
+### Features
+- Implemented a new status bar hover window displaying current Wake and Anvil versions with compatibility status indicators
+
+### Improvements
+- Show autosave toggle only when chain persistance is enabled
+- Added Anvil version tracking
+- Updated analytics with dependency version tracking information
+
+### Fixes
+- Resolved race condition during chain initialization that prevented reliable creation of the default initial chain
+
 ## [1.19.2]
 ### Fixes
 - Fixed compilation issues caused by unreliable `remappings.txt` files in Foundry projects
